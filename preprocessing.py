@@ -8,8 +8,7 @@ s388_dataset_path = "./data/s388.txt"
 # the last element for each mutation has the six attributes which are name, orignal residue, position, substitute residue, SA, ph value, temperature, energy change
 # Question : name == PDB code ? , what is mutation in the dataset? 
 def read_dataset(dataset_path):
-    all_mutations = []
-    
+    all_mutations = []    
     with open(dataset_path, "r") as f:
         count = 0
         inner_array = []
@@ -29,12 +28,10 @@ def read_dataset(dataset_path):
                    else:
                        properties.append(0)
                        
-                   inner_array.append(properties)
-                   
+                   inner_array.append(properties)                   
                    all_mutations.append(inner_array)
                    inner_array = []
-                   count = 0
-                   
+                   count = 0                   
                elif count != 9:
                    inner_array.append(line)
                    count = count + 1
@@ -47,8 +44,7 @@ def generate_s1496_dataset(all_mutations):
     remove_index = []
     for i in range(len(all_mutations)):
         for j in range(i+1,len(all_mutations)):
-            if (all_mutations[i][-1][5] == all_mutations[j][-1][5]) and (all_mutations[i][-1][6] == all_mutations[j][-1][6]) and (all_mutations[i][-1][0] == all_mutations[j][-1][0]) and (all_mutations[i][-1][1] == all_mutations[j][-1][1]) and (all_mutations[i][-1][2] == all_mutations[j][-1][2]) and (all_mutations[i][-1][3] == all_mutations[j][-1][3]) and (all_mutations[i][-1][4] == all_mutations[j][-1][4]) :
-            
+            if (all_mutations[i][-1][5] == all_mutations[j][-1][5]) and (all_mutations[i][-1][6] == all_mutations[j][-1][6]) and (all_mutations[i][-1][0] == all_mutations[j][-1][0]) and (all_mutations[i][-1][1] == all_mutations[j][-1][1]) and (all_mutations[i][-1][2] == all_mutations[j][-1][2]) and (all_mutations[i][-1][3] == all_mutations[j][-1][3]) and (all_mutations[i][-1][4] == all_mutations[j][-1][4]) :            
                 remove_index.append(j)
      
     remove_index = list(set(remove_index))    
@@ -66,13 +62,15 @@ def generate_aa_dict(s1615_mutations):
     d = {value: index for value,index in zip(aa_dict,np.arange(len(aa_dict))) }
     return d
 
+    
 #%%
 s1615_mutations = read_dataset(s1615_dataset_path)
 s388_mutations = read_dataset(s388_dataset_path)
 s1496_mutations = generate_s1496_dataset(s1615_mutations.copy())    
 aa_dict = generate_aa_dict(s1615_mutations)
+len_aa = len(aa_dict)
+#%%
 
- 
 
 
 
