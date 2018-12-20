@@ -72,7 +72,7 @@ s1496_mutations = generate_s1496_dataset(s1615_mutations.copy())
 aa_dict = generate_aa_dict(s1615_mutations)
 len_aa = len(aa_dict)
 # for now, only deal with s1496 dataset
-# further, deal with all dataset prepared
+# later, deal with all datasets prepared
 label = get_label(s1496_mutations)
 
 
