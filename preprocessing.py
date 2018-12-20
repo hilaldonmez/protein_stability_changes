@@ -22,9 +22,9 @@ def read_dataset(dataset_path):
                    properties[5] = float(properties[5]) / 10
                    properties[6] = float(properties[6]) / 100
                    properties[7] = float(properties[7] )    
-                   # 0 -> negative examples , 1 -> positive examples
+                   # -1 -> negative examples , 1 -> positive examples
                    if properties[7] < 0:
-                       properties.append(0)
+                       properties.append(-1)
                    else:
                        properties.append(1)
                        
@@ -72,7 +72,7 @@ s1496_mutations = generate_s1496_dataset(s1615_mutations.copy())
 aa_dict = generate_aa_dict(s1615_mutations)
 len_aa = len(aa_dict)
 # for now, only deal with s1496 dataset
-# later, deal with all datasets prepared
+# further, deal with all dataset prepared
 label = get_label(s1496_mutations)
 
 
