@@ -65,7 +65,7 @@ def generate_SO_vector(mutations, mutation_info, aa_dict, window_size, len_aa , 
     return SO_vectors
 
 #%%
-mutations = pr.s1615_mutations.copy()
+mutations = pr.s1496_mutations.copy()
 mutation_info = generate_mutation_info(mutations, pr. aa_dict, pr.len_aa)    
 SO_vectors_original = generate_SO_vector(mutations, mutation_info, pr.aa_dict, window_size, pr.len_aa , bio_dic = None)
 pam250 = generate_dic(pam250)
