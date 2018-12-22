@@ -4,7 +4,6 @@ from sklearn.ensemble import RandomForestClassifier
 from imblearn.combine import SMOTETomek
 
 
-
 # %%
 def get_result_label(file_name):
     result_label = []
