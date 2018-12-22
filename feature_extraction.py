@@ -48,6 +48,9 @@ def generate_SO_vector(mutations, mutation_info, aa_dict, window_size, len_aa, b
         temp_position = mut[-1][2] - 1  # the position of the mutations
         original = mut[-1][1]
         substitue = mut[-1][3]
+        temp = mut[-1][5] 
+        pH = mut[-1][6]
+        
         neighbors = temp_mut_seq[(temp_position - extention):(temp_position + extention + 1)]
         right_vector = np.zeros(extention * len_aa)
         left_vector = np.zeros(extention * len_aa)
@@ -62,10 +65,10 @@ def generate_SO_vector(mutations, mutation_info, aa_dict, window_size, len_aa, b
 
         if expand:
             bio_score = bio_dic[(original, substitue)]
-            SO_vectors.append(np.hstack((right_vector, mutation_info[i], left_vector, [bio_score])).ravel())
+            SO_vectors.append(np.hstack(( right_vector , mutation_info[i] , left_vector , [temp, pH ,bio_score])).ravel())
         else:
-            SO_vectors.append(np.hstack((right_vector, mutation_info[i], left_vector)).ravel())
-
+            SO_vectors.append(np.hstack(( right_vector , mutation_info[i] , left_vector , [temp , pH])).ravel())
+            
     return SO_vectors
 
 
