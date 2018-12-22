@@ -1,16 +1,16 @@
 import pandas as pd
 from nltk import trigrams
+import pickle
 
 dataframe = pd.read_csv('./data/pdb_data_seq.csv')
 dataframe = dataframe.loc[dataframe['macromoleculeType'] == 'Protein']
 all_sequences = dataframe['sequence'].dropna().tolist()
-one_line_seq = ''.join(all_sequences)
+
 n = 3
 
-n_grams = trigrams(one_line_seq)
+n_grams_list = [list(trigrams(x)) for x in all_sequences]
+n_grams_list = [[y[0]+y[1]+y[2] for y in x] for x in n_grams_list]
 
-with open('n_gram_model.txt', 'a') as file:
-    for gram in n_grams:
-        for g in gram:
-            file.write(g)
-        file.write('\n')
+outfile = open('n_gram_model', 'wb')
+pickle.dump(list(n_grams_list), outfile)
+outfile.close()
