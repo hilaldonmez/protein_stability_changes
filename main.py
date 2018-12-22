@@ -14,7 +14,7 @@ def main():
     window_size = 7
 
     for file in os.listdir(data_path):
-        if not file.endswith('.txt'):
+        if not file == 's1615.txt':
             continue
 
         dataset_path = data_path + file
