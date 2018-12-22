@@ -5,44 +5,45 @@ from sklearn.metrics import precision_recall_fscore_support
 import os
 from sklearn.model_selection import train_test_split
 from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_validate
 
 
-def evaluate(clf, X, y):
-    n_splits = 4
-    kf = KFold(n_splits)
-    kf.get_n_splits(X)
-
-    total_acc = 0
-    total_precision = 0
-    total_recall = 0
-    total_fscore = 0
-    total_support = 0
-    for train_index, test_index in kf.split(X):
-        X_train, X_test = X[train_index], X[test_index]
-        y_train, y_test = y[train_index], y[test_index]
-        clf.fit(X_train, y_train)
-        y_pred = clf.predict(X_test)
-        total_acc = total_acc + accuracy_score(y_test, y_pred)
-        print(precision_recall_fscore_support(y_test, y_pred, average=None, labels=[0, 1]))
-        precision, recall, f_score, support = precision_recall_fscore_support(y_test, y_pred, average=None,
-                                                                              labels=[0, 1])
-        total_precision = total_precision + precision
-        total_recall = total_recall + recall
-        total_fscore = total_fscore + f_score
-        total_support = total_support + support
-
-    mean_acc = total_acc / n_splits
-    mean_pre = total_precision / n_splits
-    mean_recall = total_recall / n_splits
-    mean_f = total_fscore / n_splits
-    mean_support = total_support / n_splits
-
-    print("Avg accuracy : ", mean_acc)
-    print("Avg precision : ", mean_pre)
-    print("Avg recall : ", mean_recall)
-    print("Avg f : ", mean_f)
-    print("Avg support : ", mean_support)
+# def evaluate(clf, X, y):
+#     n_splits = 4
+#     kf = KFold(n_splits)
+#     kf.get_n_splits(X)
+#
+#     total_acc = 0
+#     total_precision = 0
+#     total_recall = 0
+#     total_fscore = 0
+#     total_support = 0
+#     for train_index, test_index in kf.split(X):
+#         X_train, X_test = X[train_index], X[test_index]
+#         y_train, y_test = y[train_index], y[test_index]
+#         clf.fit(X_train, y_train)
+#         y_pred = clf.predict(X_test)
+#         total_acc = total_acc + accuracy_score(y_test, y_pred)
+#         print(precision_recall_fscore_support(y_test, y_pred, average=None, labels=[0, 1]))
+#         precision, recall, f_score, support = precision_recall_fscore_support(y_test, y_pred, average=None,
+#                                                                               labels=[0, 1])
+#         total_precision = total_precision + precision
+#         total_recall = total_recall + recall
+#         total_fscore = total_fscore + f_score
+#         total_support = total_support + support
+#
+#     mean_acc = total_acc / n_splits
+#     mean_pre = total_precision / n_splits
+#     mean_recall = total_recall / n_splits
+#     mean_f = total_fscore / n_splits
+#     mean_support = total_support / n_splits
+#
+#     print("Avg accuracy : ", mean_acc)
+#     print("Avg precision : ", mean_pre)
+#     print("Avg recall : ", mean_recall)
+#     print("Avg f : ", mean_f)
+#     print("Avg support : ", mean_support)
 
 
 # %%
@@ -66,36 +67,59 @@ def write_file(file_name, X, y):
     file.write(temp)
 
 
-# cross validation is necessary, but not implemented yet
-def SVM_classification(X, y):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
-    write_file("train.txt", X_train, y_train)
-    write_file("test.txt", X_test, y_test)
-    os.system("./svm_multiclass_learn -c 5.0 -t 2 -g 0.1 train.txt model_file")
-    os.system("./svm_multiclass_classify test.txt model_file result.txt")
-    result_label = get_result_label("result.txt")
-    result_label = list(map(int, result_label))
-    precision, recall, f_score, support = precision_recall_fscore_support(result_label, y_test, average=None,
-                                                                          labels=[0, 1])
-    print("Precision: ", precision, "Recall : ", recall, "F Score: ", f_score, "Support : ", support)
+def train_random_forest(X, y, n_splits):
+    clf = RandomForestClassifier(n_estimators=100)
+    calculate_metrics(clf, X, y, n_splits)
 
 
-# %%
-
-def svm_cross_validation(X, y, cv_number):
+def train_svm(X, y, n_splits):
     clf = svm.SVC(C=5, gamma=0.1, kernel='rbf')
-    scoring = ['accuracy', 'precision', 'recall', 'f1']
-    results = cross_validate(clf.fit(X, y), X, y, scoring=scoring, cv=cv_number)
-    print(results)
-    print('Accuracy: ', np.average(results['test_accuracy']))
-    print('Precision: ', np.average(results['test_precision']))
-    print('Recall: ', np.average(results['test_recall']))
-    print('F1 Score: ', np.average(results['test_f1']))
-    print()
+    calculate_metrics(clf, X, y, n_splits)
 
-    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05, random_state=0)
-    # clf.fit(X_train, y_train)
-    # print(y_test)
-    # print(clf.predict(X_test))
 
-# SVM_classification(X, y)
+def cross_validation(clf, X, y, label, n_splits):
+    kf = KFold(n_splits)
+    kf.get_n_splits(X)
+    mean_accuracy = 0
+    mean_precision = 0
+    mean_recall = 0
+
+    for train_index, test_index in kf.split(X):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        clf.fit(X_train, y_train)
+        predicted_y = clf.predict(X_test)
+        tp = 0
+        fn = 0
+        fp = 0
+        tn = 0
+        for i, j in zip(predicted_y, y_test):
+            if i == label and j == label:
+                tp += 1
+            elif j == label:
+                fn += 1
+            elif i == label:
+                fp += 1
+            else:
+                tn += 1
+
+        mean_accuracy += (tp + tn) / (tp + fn + fp + tn)
+        mean_precision += tp / (tp + fp)
+        mean_recall += tp / (tp + fn)
+
+    return mean_accuracy / n_splits, mean_precision / n_splits, mean_recall / n_splits
+
+
+def calculate_metrics(clf, X, y, n_splits):
+    mean_accuracy, mean_precision, mean_recall = cross_validation(clf, X, y, 1, n_splits)
+    print('Label 1')
+    print('accuracy: ', mean_accuracy)
+    print('precision: ', mean_precision)
+    print('recall: ', mean_recall)
+
+    mean_accuracy, mean_precision, mean_recall = cross_validation(clf, X, y, 0, n_splits)
+    print('Label 0')
+    print('accuracy: ', mean_accuracy)
+    print('precision: ', mean_precision)
+    print('recall: ', mean_recall)

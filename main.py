@@ -2,7 +2,7 @@ import os
 import numpy as np
 import preprocessing as pr
 import feature_extraction as fe
-import classification
+import classification as clf
 
 data_path = './data/'
 aa_dict = {'C': 0, 'Q': 1, 'V': 2, 'K': 3, 'E': 4, 'L': 5, 'Y': 6, 'G': 7, 'S': 8, 'F': 9, 'T': 10, 'I': 11, 'M': 12,
@@ -38,11 +38,10 @@ def main():
         SO_vectors_b62 = fe.generate_SO_vector(mutations, mutation_info, aa_dict, window_size,
                                                len_aa, b62, True)
 
-        print(len(mutations))
-
         y = np.array(pr.get_label(mutations))
         X = np.array(SO_vectors_original)
-        classification.svm_cross_validation(X, y, 3)
+        clf.train_svm(X, y, 20)
+        clf.train_random_forest(X, y, 20)
 
 
 if __name__ == '__main__':

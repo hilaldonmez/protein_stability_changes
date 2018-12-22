@@ -11,6 +11,8 @@ def read_dataset(dataset_path):
     with open(dataset_path, "r") as f:
         count = 0
         inner_array = []
+        negatives = 0
+        positives = 0
         for line in f:
             if not (line.startswith("#") or len(line.strip()) == 0):
                 line = line.replace("\n", '')
@@ -24,8 +26,10 @@ def read_dataset(dataset_path):
                     # -1 -> negative examples , 1 -> positive examples
                     if properties[7] < 0:
                         properties.append(0)
+                        negatives += 1
                     else:
                         properties.append(1)
+                        positives += 1
 
                     inner_array.append(properties)
                     all_mutations.append(inner_array)
@@ -34,6 +38,9 @@ def read_dataset(dataset_path):
                 elif count != 9:
                     inner_array.append(line)
                     count = count + 1
+
+        print(negatives)
+        print(positives)
 
     return all_mutations
 
