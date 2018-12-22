@@ -1,6 +1,8 @@
 from sklearn.model_selection import KFold
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
+from imblearn.combine import SMOTETomek
+
 
 
 # %%
@@ -10,18 +12,6 @@ def get_result_label(file_name):
         for line in f:
             result_label.append(line.split()[0])
     return result_label
-
-
-def write_file(file_name, X, y):
-    file = open(file_name, "w")
-    temp = ""
-    for mut, label in zip(X, y):
-        temp = temp + str(label)
-        for i in range(len(mut)):
-            temp = temp + " " + str(i + 1) + ":" + str(mut[i]) + " "
-        temp = temp + "\n"
-
-    file.write(temp)
 
 
 def train_random_forest(X, y, n_splits):
@@ -45,7 +35,10 @@ def cross_validation(clf, X, y, label, n_splits):
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        clf.fit(X_train, y_train)
+        smt = SMOTETomek(ratio='auto')
+        X_smt, y_smt = smt.fit_sample(X_train, y_train)
+        clf.fit(X_smt, y_smt)
+        
         predicted_y = clf.predict(X_test)
         tp = 0
         fn = 0
