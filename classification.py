@@ -6,6 +6,8 @@ import numpy as np
 from sklearn.metrics import precision_recall_fscore_support
 import os
 from sklearn.model_selection import train_test_split
+from sklearn import svm
+from sklearn.model_selection import cross_validate
 
 
 def evaluate (clf, X, y):
@@ -53,6 +55,7 @@ def get_result_label(file_name):
             result_label.append(line.split()[0])
     return result_label
 
+
 def write_file(file_name, X, y):
     file = open(file_name, "w")
     temp = ""    
@@ -74,12 +77,26 @@ def SVM_classification(X,y):
     result_label = get_result_label("result.txt")            
     result_label = list(map(int, result_label))
     precision, recall , f_score , support = precision_recall_fscore_support(result_label, y_test, average = None ,labels=[0, 1])   
-    print("Precision: ", precision, "Recall : ", recall , "F Score: ", f_score , "Support : ", support)
+    print("Precision: ", precision, "Recall : ", recall, "F Score: ", f_score, "Support : ", support)
 
 #%%
+
+
 y = np.array(pr.label)
-X = np.array(fe.SO_vectors_original)    
-SVM_classification(X,y)
+X = np.array(fe.SO_vectors_original)
+print(X[0])
+print(y[0])
+clf = svm.SVC(C=5, gamma=0.1, kernel='rbf')
+scoring = ['accuracy', 'precision', 'recall', 'f1']
+results = cross_validate(clf.fit(X, y), X, y, scoring=scoring, cv=5)
+print('Accuracy: ', np.average(results['test_accuracy']))
+print('Precision: ', np.average(results['test_precision']))
+print('Recall: ', np.average(results['test_recall']))
+print('F1 Score: ', np.average(results['test_f1']))
+print()
+
+
+# SVM_classification(X, y)
 
 
        
