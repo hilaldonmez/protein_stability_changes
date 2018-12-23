@@ -18,15 +18,17 @@ def read_dataset(dataset_path):
         mutation['sequence'] = lines[i + 3]
         mutation['secondary_structure'] = lines[i + 4]
         mutation['solvent_accessibility'] = [int(x) for x in lines[i + 7].split()]
-        mutation['ca_coordinates'] = [[float(y) for y in x.split()] for x in lines[i + 8].split('\t')]
+        mutation['ca_coordinates'] = [[float(y) for y in x.split()] for x in lines[i + 8].split('\t') if x != '']
+        if len(mutation['ca_coordinates']) == 1:
+            mutation['ca_coordinates'] = None
         mutual_info = lines[i + 9].split()
         mutation['name'] = mutual_info[0]
         mutation['original_residue'] = mutual_info[1]
         mutation['position'] = int(mutual_info[2])
         mutation['substitute_residue'] = mutual_info[3]
-        mutation['SA'] = float(mutual_info[4])/100
-        mutation['ph_value'] = float(mutual_info[5])/10
-        mutation['temperature'] = float(mutual_info[6])/100
+        mutation['SA'] = float(mutual_info[4]) / 100
+        mutation['ph_value'] = float(mutual_info[5]) / 10
+        mutation['temperature'] = float(mutual_info[6]) / 100
         mutation['energy_change'] = float(mutual_info[7])
         all_mutations.append(mutation)
     df = pd.DataFrame(data=all_mutations)

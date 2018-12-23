@@ -70,6 +70,28 @@ def get_SO_vector(row, extension, aa_dict, expand, bio_dic):
 def generate_SO_vector(mutations, aa_dict, window_size, bio_dic, expand=False):
     extension = int(window_size / 2)
 
-    SO_vectors = mutations.apply(lambda row: get_SO_vector(row, extension, aa_dict, expand, bio_dic),
-                                 axis=1)
+    SO_vectors = mutations.apply(lambda row: get_SO_vector(row, extension, aa_dict, expand, bio_dic), axis=1)
     return SO_vectors.tolist()
+
+
+def get_TO_vector(row, aa_dict):
+    sa = row['SA']
+    temp = row['temperature']
+    pH = row['ph_value']
+    ca_coordinates = row['ca_coordinates']
+    position = row['position'] - 1
+    sequence = row['sequence']
+    coord_of_target = np.array(ca_coordinates[position])
+    distances = [np.linalg.norm(coord_of_target - np.array(x)) for x in ca_coordinates]
+    TO_vector = np.zeros(len(aa_dict))
+
+    for i in range(len(distances)):
+        if distances[i] < 9 and sequence[i] != 'X':
+            TO_vector[aa_dict[sequence[i]]] += 1
+    return np.hstack((TO_vector, row['mutation_info'], [temp, pH, sa])).ravel()
+
+
+def generate_TO_vector(mutations, aa_dict):
+    to_mutations = mutations.dropna()
+    TO_vectors = to_mutations.apply(lambda row: get_TO_vector(row, aa_dict), axis=1)
+    return TO_vectors.tolist()

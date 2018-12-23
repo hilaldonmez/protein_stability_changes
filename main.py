@@ -32,8 +32,10 @@ def main():
         SO_vectors_pam250 = fe.generate_SO_vector(mutations, aa_dict, window_size, pam250, True)
         SO_vectors_b62 = fe.generate_SO_vector(mutations, aa_dict, window_size, b62, True)
 
-        y = np.array(pr.get_label(mutations))
-        X = np.array(SO_vectors_original)
+        TO_vectors = fe.generate_TO_vector(mutations, aa_dict)
+
+        y = np.array(pr.get_label(mutations.dropna()))
+        X = np.array(TO_vectors)
         clf.train_svm(X, y, 20)
         clf.train_random_forest(X, y, 20)
 
