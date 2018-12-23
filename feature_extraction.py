@@ -23,12 +23,42 @@ def generate_dic(bio_dict):
 def generate_mutation_info(mutations, aa_dict, len_aa):
     len_mutations = len(mutations)
     mut_info = np.zeros((len_mutations, len_aa))
-    for index, mut in zip(range(len_mutations), mutations):
-        original = aa_dict[mut[-1][1]]
-        new = aa_dict[mut[-1][3]]
-        mut_info[index][original] = -1
-        mut_info[index][new] = 1
-    return mut_info
+
+    original = mutations['original_residue'].apply(lambda x: aa_dict[x])
+    new = mutations['substitute_residue'].apply(lambda x: aa_dict[x])
+
+    mut_info[np.arange(len_mutations), original.tolist()] = -1
+    mut_info[np.arange(len_mutations), new.tolist()] = 1
+    mutations['mutation_info'] = mut_info.tolist()
+
+
+def get_SO_vector(row, extension, aa_dict, expand, bio_dic):
+    mut_seq = row['sequence']  # sequence of the mutations
+    position = row['position'] - 1  # the position of the mutations
+    original = row['original_residue']
+    substitue = row['substitute_residue']
+    temp = row['temperature']
+    pH = row['ph_value']
+
+    len_aa = len(aa_dict)
+
+    neighbors = mut_seq[(position - extension):(position + extension + 1)]
+    right_vector = np.zeros(extension * len_aa)
+    left_vector = np.zeros(extension * len_aa)
+
+    for i in range(len(neighbors[:extension])):
+        aa_id = aa_dict[neighbors[i]]
+        right_vector[len_aa * i + aa_id] = 1
+
+    for i in range(len(neighbors[(extension + 1):])):
+        aa_id = aa_dict[neighbors[i]]
+        left_vector[len_aa * i + aa_id] = 1
+
+    if expand:
+        bio_score = bio_dic[(original, substitue)]
+        return np.hstack((right_vector, row['mutation_info'], left_vector, [temp, pH, bio_score])).ravel()
+    else:
+        return np.hstack((right_vector, row['mutation_info'], left_vector, [temp, pH])).ravel()
 
 
 # %%
@@ -36,34 +66,12 @@ def generate_mutation_info(mutations, aa_dict, len_aa):
 # add mutation info vector
 # add pam250 and blosu62 vector at the end
 # create a vector for each mutation     
-def generate_SO_vector(mutations, mutation_info, aa_dict, window_size, len_aa, bio_dic, expand=False):
-    extention = int(window_size / 2)
-    SO_vectors = []
+def generate_SO_vector(mutations, aa_dict, window_size, len_aa, bio_dic, expand=False):
+    extension = int(window_size / 2)
 
-    for mut in mutations:
-        temp_mut_seq = mut[2]  # sequence of the mutations
-        temp_position = mut[-1][2] - 1  # the position of the mutations
-        original = mut[-1][1]
-        substitue = mut[-1][3]
-        temp = mut[-1][5]
-        pH = mut[-1][6]
+    len_mutations = len(mutations)
+    mut_info = np.zeros((len_mutations, len_aa))
 
-        neighbors = temp_mut_seq[(temp_position - extention):(temp_position + extention + 1)]
-        right_vector = np.zeros(extention * len_aa)
-        left_vector = np.zeros(extention * len_aa)
-
-        for i in range(len(neighbors[:extention])):
-            aa_id = aa_dict[neighbors[i]]
-            right_vector[len_aa * i + aa_id] = 1
-
-        for i in range(len(neighbors[(extention + 1):])):
-            aa_id = aa_dict[neighbors[i]]
-            left_vector[len_aa * i + aa_id] = 1
-
-        if expand:
-            bio_score = bio_dic[(original, substitue)]
-            SO_vectors.append(np.hstack((right_vector, mutation_info[i], left_vector, [temp, pH, bio_score])).ravel())
-        else:
-            SO_vectors.append(np.hstack((right_vector, mutation_info[i], left_vector, [temp, pH])).ravel())
-
-    return SO_vectors
+    SO_vectors = mutations.apply(lambda row: get_SO_vector(row, extension, aa_dict, expand, bio_dic),
+                                 axis=1)
+    return SO_vectors.tolist()
