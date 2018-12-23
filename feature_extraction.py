@@ -37,6 +37,7 @@ def get_SO_vector(row, extension, aa_dict, expand, bio_dic):
     position = row['position'] - 1  # the position of the mutations
     original = row['original_residue']
     substitute = row['substitute_residue']
+    sa = row['SA']
     temp = row['temperature']
     pH = row['ph_value']
 
@@ -56,9 +57,9 @@ def get_SO_vector(row, extension, aa_dict, expand, bio_dic):
 
     if expand:
         bio_score = bio_dic[(original, substitute)]
-        return np.hstack((right_vector, row['mutation_info'], left_vector, [temp, pH, bio_score])).ravel()
+        return np.hstack((right_vector, row['mutation_info'], left_vector, [temp, pH, sa, bio_score])).ravel()
     else:
-        return np.hstack((right_vector, row['mutation_info'], left_vector, [temp, pH])).ravel()
+        return np.hstack((right_vector, row['mutation_info'], left_vector, [temp, pH, sa])).ravel()
 
 
 # %%
