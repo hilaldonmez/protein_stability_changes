@@ -69,9 +69,6 @@ def get_SO_vector(row, extension, aa_dict, expand, bio_dic):
 def generate_SO_vector(mutations, aa_dict, window_size, len_aa, bio_dic, expand=False):
     extension = int(window_size / 2)
 
-    len_mutations = len(mutations)
-    mut_info = np.zeros((len_mutations, len_aa))
-
     SO_vectors = mutations.apply(lambda row: get_SO_vector(row, extension, aa_dict, expand, bio_dic),
                                  axis=1)
     return SO_vectors.tolist()
