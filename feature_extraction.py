@@ -32,7 +32,7 @@ def generate_mutation_info(mutations, aa_dict):
     mutations['mutation_info'] = mut_info.tolist()
 
 
-def get_SO_vector(row, extension, aa_dict, expand, bio_dic):
+def get_SO_vector(row, extension, aa_dict, expand, bio_dic  , nodeVec , is_node2vec):
     mut_seq = row['sequence']  # sequence of the mutations
     position = row['position'] - 1  # the position of the mutations
     original = row['original_residue']
@@ -46,6 +46,16 @@ def get_SO_vector(row, extension, aa_dict, expand, bio_dic):
     neighbors = mut_seq[(position - extension):(position + extension + 1)]
     right_vector = np.zeros(extension * len_aa)
     left_vector = np.zeros(extension * len_aa)
+    
+    if is_node2vec:
+        substitute_id = aa_dict[substitute]
+        node_vector = np.array(nodeVec[substitute_id])
+        node_vector = node_vector.reshape((128,1))
+            
+        for i in range(len(neighbors)):
+            aa_id = aa_dict[neighbors[i]]
+            node_vector = np.concatenate((node_vector, nodeVec[aa_id].reshape((128,1))))    
+        return node_vector
 
     for i in range(len(neighbors[:extension])):
         aa_id = aa_dict[neighbors[i]]
@@ -67,10 +77,10 @@ def get_SO_vector(row, extension, aa_dict, expand, bio_dic):
 # add mutation info vector
 # add pam250 and blosu62 vector at the end
 # create a vector for each mutation     
-def generate_SO_vector(mutations, aa_dict, window_size, bio_dic, expand=False):
+def generate_SO_vector(mutations, aa_dict, window_size, expand, bio_dic , nodeVec , is_node2vec):
     extension = int(window_size / 2)
 
-    SO_vectors = mutations.apply(lambda row: get_SO_vector(row, extension, aa_dict, expand, bio_dic), axis=1)
+    SO_vectors = mutations.apply(lambda row: get_SO_vector(row, extension, aa_dict, expand, bio_dic , nodeVec , is_node2vec), axis=1)
     return SO_vectors.tolist()
 
 
