@@ -6,7 +6,6 @@ b62 = MatrixInfo.blosum62
 
 
 # %%
-
 def generate_dic(bio_dict):
     d = {}
     for key in bio_dict:
@@ -20,9 +19,10 @@ def generate_dic(bio_dict):
 # return vectors for each mutations 
 # the row which corresponds to a vector for a mutation
 # column which corresponds to an aminoacid id    
-def generate_mutation_info(mutations, aa_dict, len_aa):
+def generate_mutation_info(mutations, aa_dict):
     len_mutations = len(mutations)
-    mut_info = np.zeros((len_mutations, len_aa))
+
+    mut_info = np.zeros((len_mutations, len(aa_dict)))
 
     original = mutations['original_residue'].apply(lambda x: aa_dict[x])
     new = mutations['substitute_residue'].apply(lambda x: aa_dict[x])
@@ -36,7 +36,7 @@ def get_SO_vector(row, extension, aa_dict, expand, bio_dic):
     mut_seq = row['sequence']  # sequence of the mutations
     position = row['position'] - 1  # the position of the mutations
     original = row['original_residue']
-    substitue = row['substitute_residue']
+    substitute = row['substitute_residue']
     temp = row['temperature']
     pH = row['ph_value']
 
@@ -55,7 +55,7 @@ def get_SO_vector(row, extension, aa_dict, expand, bio_dic):
         left_vector[len_aa * i + aa_id] = 1
 
     if expand:
-        bio_score = bio_dic[(original, substitue)]
+        bio_score = bio_dic[(original, substitute)]
         return np.hstack((right_vector, row['mutation_info'], left_vector, [temp, pH, bio_score])).ravel()
     else:
         return np.hstack((right_vector, row['mutation_info'], left_vector, [temp, pH])).ravel()
@@ -66,7 +66,7 @@ def get_SO_vector(row, extension, aa_dict, expand, bio_dic):
 # add mutation info vector
 # add pam250 and blosu62 vector at the end
 # create a vector for each mutation     
-def generate_SO_vector(mutations, aa_dict, window_size, len_aa, bio_dic, expand=False):
+def generate_SO_vector(mutations, aa_dict, window_size, bio_dic, expand=False):
     extension = int(window_size / 2)
 
     SO_vectors = mutations.apply(lambda row: get_SO_vector(row, extension, aa_dict, expand, bio_dic),

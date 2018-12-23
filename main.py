@@ -18,25 +18,19 @@ def main():
             continue
 
         dataset_path = data_path + file
-
         mutations = pr.read_dataset(dataset_path)
 
         if file == 's1615.txt':
             mutations = pr.generate_dataset(mutations)
 
-        len_aa = len(aa_dict)
-
-        fe.generate_mutation_info(mutations, aa_dict, len_aa)
-        SO_vectors_original = fe.generate_SO_vector(mutations, aa_dict, window_size,
-                                                    len_aa, bio_dic=None)
+        fe.generate_mutation_info(mutations, aa_dict)
+        SO_vectors_original = fe.generate_SO_vector(mutations, aa_dict, window_size, bio_dic=None)
 
         pam250 = fe.generate_dic(fe.pam250)
         b62 = fe.generate_dic(fe.b62)
 
-        SO_vectors_pam250 = fe.generate_SO_vector(mutations, aa_dict, window_size,
-                                                  len_aa, pam250, True)
-        SO_vectors_b62 = fe.generate_SO_vector(mutations, aa_dict, window_size,
-                                               len_aa, b62, True)
+        SO_vectors_pam250 = fe.generate_SO_vector(mutations, aa_dict, window_size, pam250, True)
+        SO_vectors_b62 = fe.generate_SO_vector(mutations, aa_dict, window_size, b62, True)
 
         y = np.array(pr.get_label(mutations))
         X = np.array(SO_vectors_original)
