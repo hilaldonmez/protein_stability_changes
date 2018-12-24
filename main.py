@@ -33,10 +33,10 @@ def main():
         SO_vectors_pam250 = fe.generate_SO_vector(mutations, aa_dict, window_size, True, pam250)
         SO_vectors_b62 = fe.generate_SO_vector(mutations, aa_dict, window_size, True, b62)
 
-        input_file = "vec_all_blosum.txt"
+        input_file = data_path + "vec_all_blosum.txt"
         node_vectors_blosum = nv.generate_node_vector(input_file)
         SO_vectors_node_blosum = fe.generate_node_vector(mutations, aa_dict, window_size, node_vectors_blosum)
-        input_file = "vec_all_pam.txt"
+        input_file = data_path + "vec_all_pam.txt"
         node_vectors_pam = nv.generate_node_vector(input_file)
         SO_vectors_node_pam = fe.generate_node_vector(mutations, aa_dict, window_size, node_vectors_pam)
 
