@@ -56,10 +56,10 @@ def cross_validation(clf, X, y, label, n_splits):
                 tn += 1
 
         accuracy += (tp + tn) / (tp + fn + fp + tn)
-        positive_precision += tp / (tp + fp)
-        positive_recall += tp / (tp + fn)
-        negative_precision += tn / (tn + fn)
-        negative_recall += tn / (tn + fp)
+        positive_precision += 0 if tp + fp == 0 else tp / (tp + fp)
+        positive_recall += 0 if tp + fn == 0 else tp / (tp + fn)
+        negative_precision += 0 if tn + fn == 0 else tn / (tn + fn)
+        negative_recall += 0 if tn + fp == 0 else tn / (tn + fp)
 
     metrics = [accuracy, positive_precision, positive_recall, negative_precision, negative_recall]
 
